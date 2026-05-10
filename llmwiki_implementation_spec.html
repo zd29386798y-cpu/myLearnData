@@ -1,0 +1,185 @@
+
+<style>
+* { box-sizing: border-box; }
+.wrap { padding: 1.4rem 1rem; font-family: var(--font-sans); color: var(--color-text-primary); }
+.sec { margin-bottom: 1.8rem; }
+.sec-title { font-size: 11px; font-weight: 500; letter-spacing: .06em; color: var(--color-text-secondary); text-transform: uppercase; margin-bottom: .7rem; border-bottom: 1px solid var(--color-border-tertiary); padding-bottom: .35rem; }
+.card { border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: .9rem 1.1rem; margin-bottom: .55rem; }
+.card-title { font-size: 15px; font-weight: 500; margin-bottom: .4rem; display: flex; align-items: center; gap: .5rem; }
+.card p, .card ul, .card ol { font-size: 13.5px; color: var(--color-text-secondary); margin: 0; line-height: 1.75; }
+.card ul, .card ol { padding-left: 1.3rem; }
+.card li { margin-bottom: .2rem; }
+.tag { display: inline-block; font-size: 11px; font-weight: 500; border-radius: 6px; padding: 2px 8px; }
+.t-blue   { background: #E6F1FB; color: #0C447C; }
+.t-green  { background: #EAF3DE; color: #27500A; }
+.t-amber  { background: #FAEEDA; color: #633806; }
+.t-coral  { background: #FAECE7; color: #712B13; }
+.t-purple { background: #EEEDFE; color: #3C3489; }
+.t-gray   { background: #F1EFE8; color: #444441; }
+.note { font-size: 13px; color: var(--color-text-secondary); background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: .65rem 1rem; margin-top: .55rem; border-left: 3px solid #EF9F27; border-radius: 0; }
+.note-blue { border-left-color: #378ADD; }
+.note-green { border-left-color: #639922; }
+.note-red { border-left-color: #E24B4A; }
+code { font-family: var(--font-mono); font-size: 12.5px; background: var(--color-background-secondary); padding: 1px 5px; border-radius: 4px; }
+.phase { display: flex; gap: .5rem; align-items: flex-start; margin-bottom: .5rem; }
+.phase-num { min-width: 22px; height: 22px; border-radius: 50%; background: var(--color-background-secondary); border: 1px solid var(--color-border-tertiary); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: var(--color-text-secondary); margin-top: 1px; }
+.phase-body { flex: 1; font-size: 13.5px; color: var(--color-text-secondary); line-height: 1.7; }
+.phase-body b { color: var(--color-text-primary); font-weight: 500; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: .4rem; }
+th { text-align: left; font-weight: 500; font-size: 12px; color: var(--color-text-secondary); border-bottom: 1px solid var(--color-border-tertiary); padding: .4rem .5rem; }
+td { padding: .45rem .5rem; border-bottom: 1px solid var(--color-border-tertiary); color: var(--color-text-secondary); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+.warn { background: #FAEEDA; border-radius: var(--border-radius-md); padding: .65rem 1rem; font-size: 13px; color: #633806; margin-bottom: .55rem; border-left: 3px solid #EF9F27; border-radius: 0; }
+</style>
+<div class="wrap">
+
+<div class="sec">
+  <div class="sec-title">懸念事項 最終チェック</div>
+  <div class="warn"><b>解決済み：</b> GPU なし・RAM 8〜16GB → CPU推論、Qwen2.5-7B Q4_K_M（約4.5GB）を採用。llama.cpp はCPU最適化に優れており問題なし。推論速度は約5〜10 tok/s（Core i5クラス）。</div>
+  <div class="card">
+    <p>全未決定事項が確定し、懸念事項は残っていません。以下の実装計画指示書をそのままLLMに渡して構築を開始できます。</p>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-title">確定スタック</div>
+  <div class="card">
+    <table>
+      <tr><th>役割</th><th>ツール</th><th>根拠</th></tr>
+      <tr><td>LLM推論</td><td><code>llama.cpp</code>（serverモード）</td><td>CPU最適化・Windows対応・無料</td></tr>
+      <tr><td>モデル</td><td>Qwen2.5-7B-Instruct Q4_K_M</td><td>日本語◎・4.5GB・8GBRAMで動作</td></tr>
+      <tr><td>RAG + チャットUI</td><td>AnythingLLM（Desktop版）</td><td>Windows単体インストール・オフライン対応</td></tr>
+      <tr><td>埋め込みモデル</td><td>nomic-embed-text（AnythingLLM内蔵）</td><td>追加設定不要</td></tr>
+      <tr><td>Wiki保存・編集</td><td>Obsidian</td><td>MDファイル管理・無料・オフライン完全対応</td></tr>
+      <tr><td>シーンA/C同期</td><td>Syncthing</td><td>LAN内P2P・無料・インストール型</td></tr>
+      <tr><td>シーンB持出し</td><td>USBコピー運用</td><td>ネットワーク不要・シンプル</td></tr>
+      <tr><td>回答→Wiki保存</td><td>AutoHotkey スクリプト</td><td>手動トリガー→MDファイル自動生成・無料</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-title">LLMへの実装計画指示書</div>
+
+  <div class="card">
+    <div class="card-title"><span class="tag t-gray">前提条件</span></div>
+    <ul>
+      <li>OS: Windows 10/11 (64bit)</li>
+      <li>RAM: 8〜16GB（GPU/VRAM なし、CPU推論）</li>
+      <li>使用シーン: A=事務所LANあり / B=完全オフライン / C=計算機室LANあり</li>
+      <li>チーム人数: 2〜10人</li>
+      <li>制御システム数: 最大20（Workspaceで分離）</li>
+      <li>すべて無料・OSSツールのみ使用</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="tag t-blue">フェーズ 1</span> llama.cpp セットアップ</div>
+    <ol>
+      <li>llama.cpp の Windows用ビルド済みバイナリ（<code>llama-b****-bin-win-cpu-x64.zip</code>）を GitHub Releases からダウンロード</li>
+      <li>Hugging Face から <code>Qwen2.5-7B-Instruct-Q4_K_M.gguf</code> を取得し <code>models/</code> フォルダに配置</li>
+      <li>以下のコマンドでサーバーモード起動（OpenAI互換 API を <code>localhost:8080</code> で公開）：<br>
+        <code>llama-server.exe -m models/Qwen2.5-7B-Instruct-Q4_K_M.gguf --host 0.0.0.0 --port 8080 --ctx-size 4096 -ngl 0</code></li>
+      <li>起動バッチファイル（<code>start_llm.bat</code>）を作成し、ダブルクリックで起動できるようにする</li>
+      <li>ブラウザで <code>http://localhost:8080</code> にアクセスし動作確認</li>
+    </ol>
+    <div class="note note-blue"><code>-ngl 0</code> はGPUオフロードなし（CPU専用）の指定。RAM 8GBの場合は <code>--ctx-size 2048</code> に下げること。</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="tag t-blue">フェーズ 2</span> AnythingLLM セットアップ（RAG + チャットUI）</div>
+    <ol>
+      <li>AnythingLLM Desktop版インストーラーを公式サイト（<code>useanything.com</code>）からダウンロード・インストール</li>
+      <li>初回起動後、LLMプロバイダーを「Custom OpenAI」に設定し <code>http://localhost:8080/v1</code> を指定</li>
+      <li>埋め込みモデルを「AnythingLLM Native Embedder」（nomic-embed-text）に設定</li>
+      <li>制御システムごとにWorkspaceを作成（最大20個）。命名規則例：<code>SYS01_ボイラー制御</code></li>
+      <li>各Workspaceに対応する既存資料（PDF/Word/Excel）をアップロードしてRAGインデックスを構築</li>
+      <li>チャット動作確認：資料を参照した回答が返ることを確認</li>
+    </ol>
+    <div class="note">Word/ExcelはPDF変換してからアップロードすると精度が上がる。変換はLibreOffice（無料）で一括変換可能。</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="tag t-blue">フェーズ 3</span> Obsidian wiki セットアップ</div>
+    <ol>
+      <li>Obsidian を公式サイトからダウンロード・インストール（無料）</li>
+      <li>Vaultのフォルダ構成を以下のように作成：<br>
+        <code>LLMwiki/</code><br>
+        <code>  ├─ SYS01_ボイラー制御/</code><br>
+        <code>  ├─ SYS02_冷却系統/</code><br>
+        <code>  └─ _templates/ （回答保存テンプレート）</code></li>
+      <li>テンプレートファイル <code>_templates/回答メモ.md</code> を作成（日付・質問・回答・タグフィールドを含む）</li>
+      <li>Obsidian の「Templates」コアプラグインを有効化し、テンプレートフォルダを設定</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="tag t-blue">フェーズ 4</span> 回答→wiki 自動保存スクリプト（AutoHotkey）</div>
+    <ol>
+      <li>AutoHotkey v2 を公式サイトからダウンロード・インストール（無料）</li>
+      <li>以下の動作をするスクリプト（<code>save_to_wiki.ahk</code>）を作成：
+        <ul>
+          <li>ホットキー（例：<code>Ctrl+Shift+S</code>）を押す</li>
+          <li>クリップボードの内容（AnythingLLMでコピーした回答）を取得</li>
+          <li>ファイル名ダイアログを表示（保存先Workspace・タイトルを入力）</li>
+          <li>テンプレートに日付・内容を埋め込み、指定Workspaceフォルダへ <code>.md</code> ファイルとして保存</li>
+        </ul>
+      </li>
+      <li>スクリプトをスタートアップに登録し、常駐させる</li>
+      <li>動作テスト：AnythingLLMで回答を選択→コピー→Ctrl+Shift+S→保存確認</li>
+    </ol>
+    <div class="note note-green">手動トリガー（ホットキー）で起動するため、保存したい回答だけを選別できる。全回答の自動保存よりノイズが少ない。</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="tag t-blue">フェーズ 5</span> 同期設定（シーンA/C）</div>
+    <ol>
+      <li>Syncthing を両PCにインストール（公式サイト、無料）</li>
+      <li>WebUI（<code>localhost:8384</code>）で相互にデバイスを追加し、<code>LLMwiki/</code> フォルダを共有設定</li>
+      <li>LAN内での自動同期を確認（ファイル変更後、数秒で反映）</li>
+      <li>AnythingLLMのRAGデータ（Vectorストア）の同期方法を決定：<br>
+        ・方法A：各PC独立でインデックスを保持（資料追加時は両PCで実施）<br>
+        ・方法B：AnythingLLMのデータフォルダごとSyncthingで同期（推奨）</li>
+    </ol>
+    <div class="note note-blue">AnythingLLM Desktopのデータフォルダはデフォルト <code>%APPDATA%\anythingllm-desktop</code>。このフォルダをSyncthingの共有対象に追加するとRAGデータも同期できる。ただし同時起動は避けること。</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="tag t-blue">フェーズ 6</span> シーンB オフライン持出し手順（文書化）</div>
+    <ol>
+      <li>持出し用USBに以下をコピーするバッチ（<code>export_for_offline.bat</code>）を作成：
+        <ul>
+          <li><code>llama.cpp</code> フォルダ（バイナリ＋モデル）</li>
+          <li>AnythingLLM インストーラー＋データフォルダ</li>
+          <li><code>LLMwiki/</code>（Obsidian Vault）</li>
+          <li><code>save_to_wiki.ahk</code>（保存スクリプト）</li>
+        </ul>
+      </li>
+      <li>ノートPCへのインストール手順書（<code>README.md</code>）をwikiに保存</li>
+      <li>現場作業後、更新された <code>LLMwiki/</code> を事務所PCにUSBで持ち帰りSyncthingで取り込む手順を文書化</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="tag t-amber">追加オプション</span> チーム運用ルール（文書化推奨）</div>
+    <ul>
+      <li>Workspaceの命名規則（例：<code>SYS番号_システム名</code>）</li>
+      <li>資料追加時の手順（PDF変換→AnythingLLMアップロード→インデックス確認）</li>
+      <li>wikiメモの保存タグ規則（例：<code>#設計</code> <code>#トラブル</code> <code>#手順</code>）</li>
+      <li>シーンBからの帰還同期タイミング（作業終了後24時間以内など）</li>
+    </ul>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-title">実装フェーズ全体スケジュール（目安）</div>
+  <div class="card">
+    <div class="phase"><div class="phase-num">1</div><div class="phase-body"><b>フェーズ1〜2</b>（半日）— llama.cpp＋AnythingLLMの起動・接続確認。RAGで1つのWorkspaceが動けば完了。</div></div>
+    <div class="phase"><div class="phase-num">2</div><div class="phase-body"><b>フェーズ3〜4</b>（半日）— Obsidianのフォルダ構成作成＋AutoHotkeyスクリプトの動作確認。</div></div>
+    <div class="phase"><div class="phase-num">3</div><div class="phase-body"><b>フェーズ5</b>（1〜2時間）— Syncthingのペアリングと同期テスト。</div></div>
+    <div class="phase"><div class="phase-num">4</div><div class="phase-body"><b>フェーズ6</b>（1時間）— 持出しバッチ作成＋README記述。ノートPCで動作確認。</div></div>
+    <div class="phase"><div class="phase-num">5</div><div class="phase-body"><b>残り</b>（随時）— 20Workspaceへの資料追加、チーム運用ルール整備。</div></div>
+  </div>
+</div>
+
+</div>

@@ -1,0 +1,182 @@
+
+<style>
+* { box-sizing: border-box; }
+.wrap { padding: 1.4rem 1rem; font-family: var(--font-sans); color: var(--color-text-primary); }
+h2 { font-size: 18px; font-weight: 500; margin: 0 0 1.4rem; }
+.sec { margin-bottom: 1.6rem; }
+.sec-title { font-size: 11px; font-weight: 500; letter-spacing: .06em; color: var(--color-text-secondary); text-transform: uppercase; margin-bottom: .7rem; border-bottom: 1px solid var(--color-border-tertiary); padding-bottom: .35rem; }
+.card { border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: .9rem 1.1rem; margin-bottom: .55rem; }
+.card-title { font-size: 15px; font-weight: 500; margin-bottom: .3rem; display: flex; align-items: center; gap: .5rem; }
+.card p, .card ul { font-size: 13.5px; color: var(--color-text-secondary); margin: 0; line-height: 1.7; }
+.card ul { padding-left: 1.2rem; }
+.tag { display: inline-block; font-size: 11px; font-weight: 500; border-radius: 6px; padding: 2px 8px; }
+.t-blue   { background: #E6F1FB; color: #185FA5; }
+.t-green  { background: #EAF3DE; color: #3B6D11; }
+.t-amber  { background: #FAEEDA; color: #854F0B; }
+.t-coral  { background: #FAECE7; color: #993C1D; }
+.t-purple { background: #EEEDFE; color: #534AB7; }
+.note { font-size: 13px; color: var(--color-text-secondary); background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: .65rem 1rem; margin-top: .5rem; border-left: 3px solid #EF9F27; }
+.note-blue { border-left-color: #378ADD; }
+.scene-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .5rem; }
+.scene { border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: .75rem .85rem; }
+.scene-label { font-size: 12px; font-weight: 500; margin-bottom: .4rem; }
+.scene p { font-size: 12.5px; color: var(--color-text-secondary); margin: 0; line-height: 1.6; }
+.stack-row { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .5rem; }
+.badge { font-size: 12px; background: var(--color-background-secondary); border: 1px solid var(--color-border-tertiary); border-radius: 20px; padding: 3px 10px; color: var(--color-text-secondary); }
+.arrow { color: var(--color-text-tertiary); font-size: 13px; }
+.flow { display: flex; align-items: center; flex-wrap: wrap; gap: .3rem; margin-top: .5rem; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: .4rem; }
+th { text-align: left; font-weight: 500; font-size: 12px; color: var(--color-text-secondary); border-bottom: 1px solid var(--color-border-tertiary); padding: .4rem .5rem; }
+td { padding: .45rem .5rem; border-bottom: 1px solid var(--color-border-tertiary); color: var(--color-text-secondary); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+</style>
+<div class="wrap">
+<h2>LLMwiki 要件定義 v2</h2>
+
+<!-- 目的 -->
+<div class="sec">
+  <div class="sec-title">目的</div>
+  <div class="card">
+    <div class="card-title"><span class="tag t-blue">目的</span> 制御システム毎のナレッジ蓄積と調査効率化</div>
+    <ul>
+      <li>設計・トラブル時に既存資料をAIが参照し、要約・回答を生成する</li>
+      <li>回答をMarkdownファイルとしてwikiに保存・編集・蓄積できる</li>
+      <li>制御システム単位でwikiを分離管理（フォルダ構成で対応）</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 使用シーン -->
+<div class="sec">
+  <div class="sec-title">使用シーン（制約整理）</div>
+  <div class="scene-row">
+    <div class="scene">
+      <div class="scene-label">🏢 シーン A — 事務所</div>
+      <p>ローカルLAN あり<br>PC複数台で共有アクセス可<br>サーバー役PCを1台立てられる</p>
+    </div>
+    <div class="scene">
+      <div class="scene-label">⚙️ シーン B — 計算機室（持込PC）</div>
+      <p>完全オフライン<br>ネットワーク接続なし<br>ノートPC単体で完結が必要</p>
+    </div>
+    <div class="scene">
+      <div class="scene-label">🖥️ シーン C — 計算機室（固定端末）</div>
+      <p>ローカルLAN あり<br>端末に同構成を構築<br>シーンAと同じ構成で対応可</p>
+    </div>
+  </div>
+  <div class="note note-blue" style="margin-top:.6rem">
+    <b>設計方針：</b> A・C はサーバー機1台 + クライアントWebブラウザ構成。B はノートPC 1台で完全自己完結する「ポータブル構成」を用意。共通のMDファイル構成にしておけば、Bで作成した資料をAに持ち込んで反映できる。
+  </div>
+</div>
+
+<!-- LLM -->
+<div class="sec">
+  <div class="sec-title">① ローカルLLM構成</div>
+  <div class="card">
+    <div class="card-title"><span class="tag t-green">確定</span> llama.cpp + Webサーバーモード</div>
+    <ul>
+      <li>llama.cpp の <code>--server</code> モードでOpenAI互換APIとして起動</li>
+      <li>RAGやUI側から <code>http://localhost:8080</code> で呼び出す構成</li>
+    </ul>
+    <div class="note">
+      <b>推奨モデル（8〜16GB RAM想定）：</b><br>
+      RAM 8GB → <b>Qwen2.5-7B-Instruct Q4_K_M</b>（4.5GB、日本語◎）<br>
+      RAM 16GB → <b>Mistral-7B-Instruct v0.3 Q5_K_M</b>（5.1GB）または <b>Llama-3.1-8B Q4_K_M</b>（5.0GB）<br>
+      ※ gguf形式でHugging Faceから無料取得
+    </div>
+  </div>
+</div>
+
+<!-- RAG -->
+<div class="sec">
+  <div class="sec-title">③ RAG構成（推奨）</div>
+  <div class="card">
+    <div class="card-title"><span class="tag t-purple">推奨</span> AnythingLLM — オールインワンRAGツール</div>
+    <ul>
+      <li>PDF・Word・Excel・Markdown・テキストを自動でロード・チャンク化</li>
+      <li>埋め込みモデル（nomic-embed-text）をローカルで実行、外部送信なし</li>
+      <li>ベクターDB（ChromaDB）内蔵、追加セットアップ不要</li>
+      <li>チャットUI内蔵、llama.cppのOpenAI互換APIと直接接続可能</li>
+      <li>Workspace（≒制御システム毎のwiki）単位でRAGの参照範囲を分離できる</li>
+    </ul>
+    <div class="note note-blue">
+      AnythingLLM はWindows版インストーラーあり。Dockerなしで動作可能なため、シーンBのオフライン環境にも対応しやすい。
+    </div>
+  </div>
+  <div class="flow">
+    <span class="badge">既存資料 (PDF/Word/Excel)</span>
+    <span class="arrow">→</span>
+    <span class="badge">AnythingLLM（ローダー・チャンク化）</span>
+    <span class="arrow">→</span>
+    <span class="badge">ChromaDB（ベクター検索）</span>
+    <span class="arrow">→</span>
+    <span class="badge">llama.cpp（回答生成）</span>
+    <span class="arrow">→</span>
+    <span class="badge">チャットUI（表示・保存）</span>
+  </div>
+</div>
+
+<!-- Wiki保存 -->
+<div class="sec">
+  <div class="sec-title">② wiki保存・編集（MDファイル前提）</div>
+  <table>
+    <tr>
+      <th>候補</th><th>保存形式</th><th>チーム共有</th><th>オフライン</th><th>推奨度</th>
+    </tr>
+    <tr>
+      <td><b>Obsidian + Syncthing</b></td>
+      <td>MDファイル</td>
+      <td>Syncthing で自動同期</td>
+      <td>◎ 完全対応</td>
+      <td><span class="tag t-green">◎ 推奨</span></td>
+    </tr>
+    <tr>
+      <td><b>Outline（自己ホスト）</b></td>
+      <td>MD互換DB</td>
+      <td>◎ Webブラウザで共有</td>
+      <td>× サーバー必要</td>
+      <td><span class="tag t-amber">△ シーンBに非対応</span></td>
+    </tr>
+    <tr>
+      <td><b>MkDocs（静的）</b></td>
+      <td>MDファイル</td>
+      <td>ファイル共有のみ</td>
+      <td>◎ 完全対応</td>
+      <td><span class="tag t-amber">△ 編集UIなし</span></td>
+    </tr>
+  </table>
+  <div class="note" style="margin-top:.6rem">
+    <b>推奨：Obsidian + Syncthing</b><br>
+    MDファイルをそのまま編集・閲覧。Syncthingでシーン A↔C 間のLAN同期、シーンBはUSB経由でファイルコピーに対応。AnythingLLMの回答をコピー→Obsidianに貼付けという運用が最もシンプル。
+  </div>
+</div>
+
+<!-- システム構成まとめ -->
+<div class="sec">
+  <div class="sec-title">全体構成まとめ</div>
+  <div class="card">
+    <table>
+      <tr><th>役割</th><th>ツール</th><th>備考</th></tr>
+      <tr><td>LLM実行</td><td>llama.cpp（serverモード）</td><td>OpenAI互換API、無料</td></tr>
+      <tr><td>RAG + チャットUI</td><td>AnythingLLM</td><td>Windows版インストーラーあり</td></tr>
+      <tr><td>埋め込みモデル</td><td>nomic-embed-text（内蔵）</td><td>AnythingLLM内で自動管理</td></tr>
+      <tr><td>wiki保存・編集</td><td>Obsidian</td><td>MDファイル、無料</td></tr>
+      <tr><td>チーム同期（A・C）</td><td>Syncthing</td><td>LAN内P2P同期、無料</td></tr>
+      <tr><td>資料形式対応</td><td>AnythingLLM内蔵ローダー</td><td>PDF・Word・Excel・MD対応</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- 未決定事項 -->
+<div class="sec">
+  <div class="sec-title">残り未決定事項（実装計画前に確認）</div>
+  <div class="card">
+    <ul>
+      <li>PCスペック詳細（GPUあり/なし、VRAM量）→ モデルのquant設定に影響</li>
+      <li>シーンA/CのサーバーはノートPC兼用か、専用機か</li>
+      <li>AnythingLLMの「回答→Obsidian保存」は手動コピーで許容か、自動化（スクリプト）が必要か</li>
+      <li>制御システムの数（Workspaceの分割数に影響）</li>
+    </ul>
+  </div>
+</div>
+
+</div>
